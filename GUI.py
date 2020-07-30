@@ -23,10 +23,13 @@ class MainWindow(QtWidgets.QMainWindow):
     # create functions to initialize the GUI
     def init_GUI(self):
         self.menu_bar()
+        self.PID = '{:7}'.format(str(os.getpid()))
+
         self.status_lb_0 = QtWidgets.QLabel("")
         self.status_lb_1 = QtWidgets.QLabel("Stream : Running")
         self.status_lb_2 = QtWidgets.QLabel("Terrain: Running")
 
+        self.status_lb_0.setText("PID : " + self.PID)
         self.status_btn_1 = QtWidgets.QPushButton("  Start Streaming  ")
         self.status_btn_2 = QtWidgets.QPushButton("  Start Analysis   ")
 
@@ -80,13 +83,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.statusBar().showMessage("GUI initializing complete.", 3000)
 
         # comment out for adding new functions
-
         # add stream videos to labels
-        self.stream_video = self.display(
-            self.label_stream, stream_width, stream_height)
+        # set as daemon thread
+        # so that it can be killed when main thread is closed
+        self.stream_video = Thread(
+            target=StreamVideo(url, self.label_stream, stream_width, stream_height).output, daemon=True)
+        self.stream_video.start()
 
-        self.terrain_video = self.display(
-            self.label_terrain, terrain_width, terrain_height)
+        self.terrain_video = Thread(
+            target=StreamVideo(url, self.label_terrain, terrain_width, terrain_height).output, daemon=True)
+        self.terrain_video.start()
 
         # add joystick to MainWindow
 
@@ -108,11 +114,7 @@ class MainWindow(QtWidgets.QMainWindow):
         quitAction.triggered.connect(self.quit)
 
     def display(self, out_label, width, height):
-        self.PID = '{:7}'.format(str(os.getpid()))
-        self.status_lb_0.setText("PID : " + self.PID)
-        # print("PID:", os.getpid())  # for testing
-        Thread(
-            target=StreamVideo(url, out_label, width, height).output).start()
+        print("PID:", os.getpid())  # for testing
 
     def createJoystick(self):
         self.btn_up = QtWidgets.QPushButton("", self)
