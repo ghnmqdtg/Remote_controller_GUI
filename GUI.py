@@ -1,12 +1,16 @@
 import sys
-from PyQt5 import (QtWidgets, QtGui, QtCore, Qt)
+import os
+from threading import Thread
+from PyQt5 import (QtWidgets, QtGui, QtCore)
+from stream import StreamVideo
 
 
 class MainWindow(QtWidgets.QMainWindow):
 
-    def __init__(self):
+    def __init__(self, url):
         super().__init__()
 
+        # set window size
         self.size = QtWidgets.QApplication.primaryScreen().size()
         self.width = self.size.width() * 0.8
         self.height = self.size.height() * 0.8
@@ -25,20 +29,30 @@ class MainWindow(QtWidgets.QMainWindow):
         terrain_width = int(stream_width * 0.5)
         terrain_height = int(stream_height * 0.5)
 
-        self.stream_video = QtGui.QPixmap("img/044.jpg")
-        self.terrain_video = QtGui.QPixmap("img/042.jpg")
-
+        # creat label of camera stream video
         self.label_stream = QtWidgets.QLabel(self)
-        self.label_stream.setPixmap(self.stream_video)
         self.label_stream.setGeometry(
             10, 10, stream_width, stream_height)
 
+        # creat label of terrain video
         self.label_terrain = QtWidgets.QLabel(self)
-        self.label_terrain.setPixmap(self.terrain_video)
         self.label_terrain.setGeometry(
             stream_width + 20, 10, terrain_width, terrain_height)
 
+        # add stream videos to labels
+        self.stream_video = self.display(
+            self.label_stream, stream_width, stream_height)
+
+        self.terrain_video = self.display(
+            self.label_terrain, terrain_width, terrain_height)
+
+        # add joystick to MainWindow
         self.createJoystick()
+
+    def display(self, out_label, width, height):
+        print("PID:", os.getpid())
+        Thread(
+            target=StreamVideo(url, out_label, width, height).output).start()
 
     def createJoystick(self):
         self.btn_up = QtWidgets.QPushButton("", self)
@@ -91,7 +105,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 if __name__ == "__main__":
+    # RTMP URL of camera stream video
+    url = "rtmp://202.69.69.180:443/webcast/bshdlive-pc"
+
     app = QtWidgets.QApplication(sys.argv)
-    main = MainWindow()
+    main = MainWindow(url)
     main.show()
     sys.exit(app.exec_())
