@@ -10,8 +10,10 @@ class StreamVideo(object):
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.out_label = out_label
-        print(url)
-        print(self.out_label)
+
+        # print(url)
+        # print(self.out_label)
+
         # FPS = 1/X
         # X = desired FPS
         self.FPS = 1 / 30

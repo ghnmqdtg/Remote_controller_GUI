@@ -15,15 +15,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.width = self.size.width() * 0.8
         self.height = self.size.height() * 0.8
 
+        self.stylesheet = self.style()
+
         self.init_GUI()
 
         self.setWindowTitle("Remote Controller")
+        self.setStyleSheet(self.stylesheet)
         self.setGeometry(
             50, 50, int(self.width), int(self.height))
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
     # create functions to initialize the GUI
     def init_GUI(self):
+        self.font = QtGui.QFont('Helvetica', 20, QtGui.QFont.Bold)
+        self.menu_bar()
         stream_width = int(self.width * 0.6)
         stream_height = int(self.height * 0.6)
         terrain_width = int(stream_width * 0.5)
@@ -32,12 +37,17 @@ class MainWindow(QtWidgets.QMainWindow):
         # creat label of camera stream video
         self.label_stream = QtWidgets.QLabel(self)
         self.label_stream.setGeometry(
-            10, 10, stream_width, stream_height)
+            10, 35, stream_width, stream_height)
 
         # creat label of terrain video
         self.label_terrain = QtWidgets.QLabel(self)
         self.label_terrain.setGeometry(
-            stream_width + 20, 10, terrain_width, terrain_height)
+            stream_width + 20, 35, terrain_width, terrain_height)
+
+        # add status bar
+        self.statusBar().showMessage("GUI initializing complete.")
+
+        # comment out for adding new functions
 
         # add stream videos to labels
         self.stream_video = self.display(
@@ -49,8 +59,26 @@ class MainWindow(QtWidgets.QMainWindow):
         # add joystick to MainWindow
         self.createJoystick()
 
+    # add menu bar to MainWindow
+    def menu_bar(self):
+        # create menu bar
+        menuBar = self.menuBar()
+
+        # create the action
+        quitAction = QtWidgets.QAction("Quit", self)
+        quitAction.setShortcut("CTRL+Q")
+
+        # add action to menu
+        controlMenu = menuBar.addMenu("&Control")
+        controlMenu.addAction(quitAction)
+
+        quitAction.triggered.connect(self.quit)
+
     def display(self, out_label, width, height):
-        print("PID:", os.getpid())
+        self.PID = str(os.getpid())
+        self.statusBar().showMessage("PID : " + self.PID)
+
+        # print("PID:", os.getpid())  # for testing
         Thread(
             target=StreamVideo(url, out_label, width, height).output).start()
 
@@ -88,11 +116,44 @@ class MainWindow(QtWidgets.QMainWindow):
             self.send_command("3")
         elif(event.key() == QtCore.Qt.Key_F11):
             self.full_screen()
-        elif(event.key() == QtCore.Qt.Key_Space):
-            self.quit()
 
     def send_command(self, signal):
         print(signal)
+
+    def style(self):
+        stylesheet = """
+            QMenuBar {
+                background-color: #2e2e2e;
+                color: #e0e0e0;
+                font: bold;
+                font-size: 16px;
+                font-family: Helvetica;
+            }
+
+            QMenuBar::item {
+                background-color: transparent;
+            }
+
+            QMenuBar::item:selected {
+                background-color: #ffffff;
+                color: #2e2e2e;
+            }
+
+            QMenu {
+                background-color: #2e2e2e;
+                color: #ffffff;
+                font: bold;
+                font-size: 16px;
+                font-family: Helvetica;
+            }
+
+            QMenu::item:selected {
+                background-color: #ffffff;
+                color: #2e2e2e;
+            }
+        """
+
+        return stylesheet
 
     def full_screen(self):
         if(self.windowState() & QtCore.Qt.WindowFullScreen):
