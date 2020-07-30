@@ -1,51 +1,83 @@
 import sys
 import os
+import style
 from threading import Thread
 from PyQt5 import (QtWidgets, QtGui, QtCore)
 from stream import StreamVideo
+
+
+class VLine(QtWidgets.QFrame):
+    def __init__(self):
+        super(VLine, self).__init__()
+        self.setFrameShape(self.VLine)
 
 
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, url):
         super().__init__()
+        self.setWindowTitle("Remote Controller")
+        self.init_GUI()
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+
+    # create functions to initialize the GUI
+    def init_GUI(self):
+        self.menu_bar()
+        self.status_lb_0 = QtWidgets.QLabel("")
+        self.status_lb_1 = QtWidgets.QLabel("Stream : Running")
+        self.status_lb_2 = QtWidgets.QLabel("Terrain: Running")
+
+        self.status_btn_1 = QtWidgets.QPushButton("  Start Streaming  ")
+        self.status_btn_2 = QtWidgets.QPushButton("  Start Analysis   ")
+
+        self.status_lb_0.setObjectName("status_lb")
+        self.status_lb_1.setObjectName("status_lb")
+        self.status_lb_2.setObjectName("status_lb")
+        self.status_btn_1.setObjectName("status_btn")
+        self.status_btn_2.setObjectName("status_btn")
+
+        self.statusBar().addPermanentWidget(self.status_lb_0)
+        self.statusBar().addPermanentWidget(self.status_lb_1)
+        self.statusBar().addPermanentWidget(self.status_lb_2)
+        self.statusBar().addPermanentWidget(self.status_btn_1)
+        self.statusBar().addPermanentWidget(self.status_btn_2)
+
+        # button clicked
+        self.status_btn_1.clicked.connect(
+            lambda: self.statusBar().showMessage("RTMP Server Conneting..."))
+
+        self.status_btn_2.clicked.connect(
+            lambda: self.statusBar().showMessage("Initializing Analysis..."))
+
+        # set style
+        self.style_main = style.style_main(self)
+        self.style_statusbar = style.style_statusbar(self)
+        self.setStyleSheet(self.style_main)
+        self.statusBar().setStyleSheet(self.style_statusbar)
 
         # set window size
         self.size = QtWidgets.QApplication.primaryScreen().size()
         self.width = self.size.width() * 0.8
         self.height = self.size.height() * 0.8
-
-        self.stylesheet = self.style()
-
-        self.init_GUI()
-
-        self.setWindowTitle("Remote Controller")
-        self.setStyleSheet(self.stylesheet)
         self.setGeometry(
             50, 50, int(self.width), int(self.height))
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
-
-    # create functions to initialize the GUI
-    def init_GUI(self):
-        self.font = QtGui.QFont('Helvetica', 20, QtGui.QFont.Bold)
-        self.menu_bar()
-        stream_width = int(self.width * 0.6)
-        stream_height = int(self.height * 0.6)
-        terrain_width = int(stream_width * 0.5)
-        terrain_height = int(stream_height * 0.5)
+        stream_width = int(self.width * 0.8)
+        stream_height = int(self.height * 0.8)
+        terrain_width = int(self.width * 0.3)
+        terrain_height = int(self.height * 0.3)
 
         # creat label of camera stream video
         self.label_stream = QtWidgets.QLabel(self)
         self.label_stream.setGeometry(
-            10, 35, stream_width, stream_height)
+            20, 45, stream_width, stream_height)
 
         # creat label of terrain video
         self.label_terrain = QtWidgets.QLabel(self)
         self.label_terrain.setGeometry(
-            stream_width + 20, 35, terrain_width, terrain_height)
+            stream_width + 40, 45, terrain_width, terrain_height)
 
         # add status bar
-        self.statusBar().showMessage("GUI initializing complete.")
+        self.statusBar().showMessage("GUI initializing complete.", 3000)
 
         # comment out for adding new functions
 
@@ -57,7 +89,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.label_terrain, terrain_width, terrain_height)
 
         # add joystick to MainWindow
-        self.createJoystick()
+
+        # self.createJoystick()
 
     # add menu bar to MainWindow
     def menu_bar(self):
@@ -75,9 +108,8 @@ class MainWindow(QtWidgets.QMainWindow):
         quitAction.triggered.connect(self.quit)
 
     def display(self, out_label, width, height):
-        self.PID = str(os.getpid())
-        self.statusBar().showMessage("PID : " + self.PID)
-
+        self.PID = '{:7}'.format(str(os.getpid()))
+        self.status_lb_0.setText("PID : " + self.PID)
         # print("PID:", os.getpid())  # for testing
         Thread(
             target=StreamVideo(url, out_label, width, height).output).start()
@@ -107,53 +139,22 @@ class MainWindow(QtWidgets.QMainWindow):
     def keyPressEvent(self, event):
         # print(event.text())
         if(event.key() == QtCore.Qt.Key_Up):
+            self.statusBar().showMessage("Up")
             self.send_command("0")
         elif(event.key() == QtCore.Qt.Key_Down):
+            self.statusBar().showMessage("Down")
             self.send_command("1")
         elif(event.key() == QtCore.Qt.Key_Left):
+            self.statusBar().showMessage("Left")
             self.send_command("2")
         elif(event.key() == QtCore.Qt.Key_Right):
+            self.statusBar().showMessage("Right")
             self.send_command("3")
         elif(event.key() == QtCore.Qt.Key_F11):
             self.full_screen()
 
     def send_command(self, signal):
         print(signal)
-
-    def style(self):
-        stylesheet = """
-            QMenuBar {
-                background-color: #2e2e2e;
-                color: #e0e0e0;
-                font: bold;
-                font-size: 16px;
-                font-family: Helvetica;
-            }
-
-            QMenuBar::item {
-                background-color: transparent;
-            }
-
-            QMenuBar::item:selected {
-                background-color: #ffffff;
-                color: #2e2e2e;
-            }
-
-            QMenu {
-                background-color: #2e2e2e;
-                color: #ffffff;
-                font: bold;
-                font-size: 16px;
-                font-family: Helvetica;
-            }
-
-            QMenu::item:selected {
-                background-color: #ffffff;
-                color: #2e2e2e;
-            }
-        """
-
-        return stylesheet
 
     def full_screen(self):
         if(self.windowState() & QtCore.Qt.WindowFullScreen):
