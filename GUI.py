@@ -16,6 +16,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, url):
         super().__init__()
+        self.isStreaming = False
         self.setWindowTitle("Remote Controller")
         self.init_GUI()
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -23,6 +24,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # create functions to initialize the GUI
     def init_GUI(self):
         self.menu_bar()
+        # fetch PID
         self.PID = '{:7}'.format(str(os.getpid()))
 
         self.status_lb_0 = QtWidgets.QLabel("")
@@ -45,9 +47,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.statusBar().addPermanentWidget(self.status_btn_1)
         self.statusBar().addPermanentWidget(self.status_btn_2)
 
-        # button clicked
-        self.status_btn_1.clicked.connect(
-            lambda: self.statusBar().showMessage("RTMP Server Conneting..."))
+        # add stream videos to labels
+        self.status_btn_1.clicked.connect(self.display_stream)
 
         self.status_btn_2.clicked.connect(
             lambda: self.statusBar().showMessage("Initializing Analysis..."))
@@ -64,38 +65,31 @@ class MainWindow(QtWidgets.QMainWindow):
         self.height = self.size.height() * 0.8
         self.setGeometry(
             50, 50, int(self.width), int(self.height))
-        stream_width = int(self.width * 0.8)
-        stream_height = int(self.height * 0.8)
-        terrain_width = int(self.width * 0.3)
-        terrain_height = int(self.height * 0.3)
+        self.stream_width = int(self.width * 0.8)
+        self.stream_height = int(self.height * 0.8)
+        self.terrain_width = int(self.width * 0.3)
+        self.terrain_height = int(self.height * 0.3)
 
         # creat label of camera stream video
         self.label_stream = QtWidgets.QLabel(self)
         self.label_stream.setGeometry(
-            20, 45, stream_width, stream_height)
+            20, 45, self.stream_width, self.stream_height)
 
         # creat label of terrain video
         self.label_terrain = QtWidgets.QLabel(self)
         self.label_terrain.setGeometry(
-            stream_width + 40, 45, terrain_width, terrain_height)
+            self.stream_width + 40, 45, self.terrain_width, self.terrain_height)
 
         # add status bar
         self.statusBar().showMessage("GUI initializing complete.", 3000)
 
-        # comment out for adding new functions
-        # add stream videos to labels
-        # set as daemon thread
-        # so that it can be killed when main thread is closed
-        self.stream_video = Thread(
-            target=StreamVideo(url, self.label_stream, stream_width, stream_height).output, daemon=True)
-        self.stream_video.start()
-
+        '''
         self.terrain_video = Thread(
-            target=StreamVideo(url, self.label_terrain, terrain_width, terrain_height).output, daemon=True)
+            target=StreamVideo(url, self.label_terrain, self.terrain_width, self.terrain_height).output, daemon=True)
         self.terrain_video.start()
+        '''
 
         # add joystick to MainWindow
-
         # self.createJoystick()
 
     # add menu bar to MainWindow
@@ -113,9 +107,23 @@ class MainWindow(QtWidgets.QMainWindow):
 
         quitAction.triggered.connect(self.quit)
 
-    def display(self, out_label, width, height):
-        print("PID:", os.getpid())  # for testing
+    def display_stream(self):
+        # set as daemon thread
+        # so that it can be killed when main thread is closed
+        if(self.isStreaming is False):
+            self.isStreaming = True
+            self.status_btn_1.setText("  Stop Streaming  ")
+            self.stream_video = Thread(
+                target=StreamVideo(url, self.label_stream, self.stream_width, self.stream_height, self.isStreaming).output, daemon=True)
+            self.statusBar().showMessage("RTMP server connected", 5000)
+            self.stream_video.start()
+        else:
+            self.isStreaming = False
+            self.status_btn_1.setText("  Start Streaming  ")
+            # self.stream_video.join(5)
+            self.statusBar().showMessage("RTMP server disconnected", 2000)
 
+    '''
     def createJoystick(self):
         self.btn_up = QtWidgets.QPushButton("", self)
         self.btn_up.setIcon(QtGui.QIcon("icon/up-arrow.png"))
@@ -137,6 +145,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_right.setIcon(QtGui.QIcon("icon/right-arrow.png"))
         self.btn_right.setIconSize(QtCore.QSize(60, 60))
         self.btn_right.setGeometry(1200, 600, 70, 70)
+    '''
 
     def keyPressEvent(self, event):
         # print(event.text())
@@ -170,6 +179,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     # RTMP URL of camera stream video
+    # url = "rtmp://192.168.43.155/live"
     url = "rtmp://202.69.69.180:443/webcast/bshdlive-pc"
 
     app = QtWidgets.QApplication(sys.argv)
