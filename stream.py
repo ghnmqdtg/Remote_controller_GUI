@@ -1,36 +1,69 @@
 import cv2
 import time
+import threading
 from PyQt5.QtGui import (QImage, QPixmap)
 
-class StreamVideo(object):
 
-    def __init__(self, url, out_label, width, height, flag):
-        self.capture = cv2.VideoCapture(url)
+# this solution is inspired from stackoverflow:
+# https://reurl.cc/MvrER4
+class StoppableThread(threading.Thread):
+    # inherit from threading.Thread
+    # Thread class with a stop() method.
+    # The thread itself has to check regularly for the stopped() condition.
+
+    def __init__(self, url, out_label, width, height):
+        super().__init__()
+        self._stop_event = threading.Event()
+        self.url = url
+        self.out_label = out_label
         self.width = width
         self.height = height
-        self.capture.set(cv2.CAP_PROP_BUFFERSIZE, 2)
-        self.out_label = out_label
-        self.isStreaming = flag
-        # print(url)
-        # print(self.out_label)
 
+    def stop(self):
+        # set self._stop_event as True
+        self._stop_event.set()
+
+    def stopped(self):
+        # if self._stop_event is True, return True
+        return self._stop_event.is_set()
+
+
+class StreamVideo(StoppableThread):
+
+    def run(self):
+        capture = cv2.VideoCapture(self.url)
+        capture.set(cv2.CAP_PROP_BUFFERSIZE, 2)
         # FPS = 1/X
         # X = desired FPS
-        self.FPS = 1 / 60
-        self.FPS_MS = int(self.FPS * 1000)
-
-    def output(self, ):
-        time.sleep(1)
-        while(self.isStreaming):
-            (status, frame) = self.capture.read()
+        FPS = 1 / 60
+        FPS_MS = int(FPS * 1000)
+        while(not self.stopped()):
+            (status, frame) = capture.read()
             if(status):
-                # convert from RGB to BGR
+                # resize the frame to fit the out.label
                 frame = cv2.resize(frame, (self.width, self.height))
+                # convert from RGB to BGR
                 frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                 # The image is stored using a 24-bit RGB format (8-8-8).
-                img = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+                img = QImage(
+                    frame.data,
+                    frame.shape[1],
+                    frame.shape[0],
+                    QImage.Format_RGB888
+                )
+                # output image
                 self.out_label.setPixmap(QPixmap.fromImage(img))
-                time.sleep(self.FPS)
-                cv2.waitKey(self.FPS_MS)
+                # cv2.imshow("frame", frame)  # for debugging
+                time.sleep(FPS)
+                cv2.waitKey(FPS_MS)
             else:
                 break
+
+
+# for debugging
+if __name__ == "__main__":
+    url = "rtmp://202.69.69.180:443/webcast/bshdlive-pc"
+    testthread = StreamVideo(url)
+    testthread.start()
+    time.sleep(10)
+    testthread.stop()

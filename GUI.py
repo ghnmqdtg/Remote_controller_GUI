@@ -1,9 +1,8 @@
 import sys
 import os
 import style
-from threading import Thread
+import stream
 from PyQt5 import (QtWidgets, QtGui, QtCore)
-from stream import StreamVideo
 
 
 class VLine(QtWidgets.QFrame):
@@ -17,6 +16,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, url):
         super().__init__()
         self.isStreaming = False
+        self.isAnalysing = False
         self.setWindowTitle("Remote Controller")
         self.init_GUI()
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -28,12 +28,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.PID = '{:7}'.format(str(os.getpid()))
 
         self.status_lb_0 = QtWidgets.QLabel("")
-        self.status_lb_1 = QtWidgets.QLabel("Stream : Running")
-        self.status_lb_2 = QtWidgets.QLabel("Terrain: Running")
+        self.status_lb_1 = QtWidgets.QLabel("Stream : Disabled")
+        self.status_lb_2 = QtWidgets.QLabel("Terrain : Disabled")
+        self.status_lb_0.setFixedWidth(120)
+        self.status_lb_1.setFixedWidth(200)
+        self.status_lb_2.setFixedWidth(200)
 
         self.status_lb_0.setText("PID : " + self.PID)
         self.status_btn_1 = QtWidgets.QPushButton("  Start Streaming  ")
-        self.status_btn_2 = QtWidgets.QPushButton("  Start Analysis   ")
+        self.status_btn_2 = QtWidgets.QPushButton("  Start Analysing  ")
 
         self.status_lb_0.setObjectName("status_lb")
         self.status_lb_1.setObjectName("status_lb")
@@ -49,9 +52,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # add stream videos to labels
         self.status_btn_1.clicked.connect(self.display_stream)
-
-        self.status_btn_2.clicked.connect(
-            lambda: self.statusBar().showMessage("Initializing Analysis..."))
+        self.status_btn_2.clicked.connect(self.display_terrain)
 
         # set style
         self.style_main = style.style_main(self)
@@ -83,15 +84,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # add status bar
         self.statusBar().showMessage("GUI initializing complete.", 3000)
 
-        '''
-        self.terrain_video = Thread(
-            target=StreamVideo(url, self.label_terrain, self.terrain_width, self.terrain_height).output, daemon=True)
-        self.terrain_video.start()
-        '''
-
-        # add joystick to MainWindow
-        # self.createJoystick()
-
     # add menu bar to MainWindow
     def menu_bar(self):
         # create menu bar
@@ -108,44 +100,42 @@ class MainWindow(QtWidgets.QMainWindow):
         quitAction.triggered.connect(self.quit)
 
     def display_stream(self):
-        # set as daemon thread
-        # so that it can be killed when main thread is closed
         if(self.isStreaming is False):
             self.isStreaming = True
-            self.status_btn_1.setText("  Stop Streaming  ")
-            self.stream_video = Thread(
-                target=StreamVideo(url, self.label_stream, self.stream_width, self.stream_height, self.isStreaming).output, daemon=True)
-            self.statusBar().showMessage("RTMP server connected", 5000)
+            self.status_lb_1.setText("Stream : Enabled ")
+            self.status_btn_1.setText("  Stop  Streaming  ")
+            self.statusBar().showMessage("RTMP server connecting...", 5000)
+            # threads can only be started once
+            self.stream_video = stream.StreamVideo(
+                url, self.label_stream, self.stream_width, self.stream_height)
+            self.stream_video.setDaemon(True)
             self.stream_video.start()
         else:
             self.isStreaming = False
+            self.stream_video.stop()
+            self.label_stream.setText(" ")
+            self.status_lb_1.setText("Stream : Disabled")
             self.status_btn_1.setText("  Start Streaming  ")
-            # self.stream_video.join(5)
             self.statusBar().showMessage("RTMP server disconnected", 2000)
 
-    '''
-    def createJoystick(self):
-        self.btn_up = QtWidgets.QPushButton("", self)
-        self.btn_up.setIcon(QtGui.QIcon("icon/up-arrow.png"))
-        self.btn_up.setIconSize(QtCore.QSize(60, 60))
-        self.btn_up.setGeometry(1100, 500, 70, 70)
-        # self.btn_up.clicked.connect(self.send_command)
-
-        self.btn_down = QtWidgets.QPushButton("", self)
-        self.btn_down.setIcon(QtGui.QIcon("icon/down-arrow.png"))
-        self.btn_down.setIconSize(QtCore.QSize(60, 60))
-        self.btn_down.setGeometry(1100, 700, 70, 70)
-
-        self.btn_left = QtWidgets.QPushButton("", self)
-        self.btn_left.setIcon(QtGui.QIcon("icon/left-arrow.png"))
-        self.btn_left.setIconSize(QtCore.QSize(60, 60))
-        self.btn_left.setGeometry(1000, 600, 70, 70)
-
-        self.btn_right = QtWidgets.QPushButton("", self)
-        self.btn_right.setIcon(QtGui.QIcon("icon/right-arrow.png"))
-        self.btn_right.setIconSize(QtCore.QSize(60, 60))
-        self.btn_right.setGeometry(1200, 600, 70, 70)
-    '''
+    def display_terrain(self):
+        if(self.isAnalysing is False):
+            self.isAnalysing = True
+            self.status_lb_2.setText("Terrain : Enabled ")
+            self.status_btn_2.setText("  Stop  Analysing  ")
+            self.statusBar().showMessage("Analysing enabled", 5000)
+            # threads can only be started once
+            self.terrain_video = stream.StreamVideo(
+                url, self.label_terrain, self.terrain_width, self.terrain_height)
+            self.terrain_video.setDaemon(True)
+            self.terrain_video.start()
+        else:
+            self.isAnalysing = False
+            self.terrain_video.stop()
+            self.label_terrain.setText(" ")
+            self.status_lb_2.setText("Terrain : Disabled")
+            self.status_btn_2.setText("  Start Analysing  ")
+            self.statusBar().showMessage("Analysing disabled", 2000)
 
     def keyPressEvent(self, event):
         # print(event.text())

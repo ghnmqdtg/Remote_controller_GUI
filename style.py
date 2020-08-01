@@ -9,7 +9,7 @@ def style_main(self):
             color: #e0e0e0;
             font: bold;
             font-size: 16px;
-            font-family: Microsoft YaHei UI;
+            font-family: Consolas;
         }
 
         QMenuBar::item {
@@ -26,7 +26,7 @@ def style_main(self):
             color: #ffffff;
             font: bold;
             font-size: 16px;
-            font-family: Microsoft YaHei UI;
+            font-family: Consolas;
         }
 
         QMenu::item:selected {
@@ -38,7 +38,7 @@ def style_main(self):
             background-color: #4e4e4e;
             color: #fafafa;
             font-size: 18px;
-            font-family: Microsoft YaHei UI;
+            font-family: Consolas;
         }
 
         QLabel {
@@ -52,7 +52,7 @@ def style_main(self):
             margin-left: 2px;
             margin-right: 2px;
             font-size: 18px;
-            font-family: Microsoft YaHei UI;
+            font-family: Consolas;
         }
 
         QStatusBar::item {
@@ -68,7 +68,7 @@ def style_statusbar(self):
         color: #ffffff;
         background-color: #2e2e2e;
         font-size: 18px;
-        font-family: Microsoft YaHei UI;
+        font-family: Consolas;
     """
 
     return stylesheet
