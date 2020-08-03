@@ -57,6 +57,7 @@ class StreamVideo(StoppableThread):
                 time.sleep(FPS)
                 cv2.waitKey(FPS_MS)
             else:
+                self.out_label.setText("URL not found")
                 break
 
 

@@ -34,16 +34,26 @@ def style_main(self):
             color: #2e2e2e;
         }
 
-        QPushButton#status_btn {
+        QPushButton {
             background-color: #4e4e4e;
             color: #fafafa;
+            font: bold;
             font-size: 18px;
             font-family: Consolas;
         }
 
         QLabel {
             color: #ffffff;
+            font: bold;
+            font-size: 18px;
+            font-family: Consolas;
+        }
+
+        QLabel#video {
+            color: #ffffff;
             background-color: #4e4e4e;
+            font-size: 50px;
+            font-family: Consolas;
         }
 
         QLabel#status_lb {
@@ -57,6 +67,15 @@ def style_main(self):
 
         QStatusBar::item {
             border: 0px;
+        }
+
+        QTextEdit {
+            background-color: #4e4e4e;
+            border: 0px;
+            color: #ffffff;
+            font: bold;
+            font-size: 17px;
+            font-family: Consolas;
         }
     """
 
