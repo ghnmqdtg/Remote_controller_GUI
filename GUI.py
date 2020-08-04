@@ -2,6 +2,7 @@ import sys
 import os
 import style
 import stream
+import requests
 from PyQt5 import (QtWidgets, QtGui, QtCore, Qt)
 
 
@@ -11,9 +12,11 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.isStreaming = False
         self.isAnalysing = False
+        self.isControlling = False
         self.setWindowTitle("Remote Controller")
         self.url_stream = ""
         self.url_terrain = ""
+        self.url_control = ""
         self.init_GUI()
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
@@ -101,19 +104,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.text_btn_url_2.setGeometry(1000, self.stream_height + 150, 100, 30)
         self.text_btn_url_2.clicked.connect(self.URL_read)
 
+        self.url_lb_3 = QtWidgets.QLabel("Backend Server", self)
+        self.url_lb_3.setGeometry(30, self.stream_height + 210, 200, 30)
+        self.textEdit_url_3 = QtWidgets.QTextEdit(self)
+        self.textEdit_url_3.setGeometry(200, self.stream_height + 210, 780, 30)
+        self.text_btn_url_3 = QtWidgets.QPushButton("Submit", self)
+        self.text_btn_url_3.setGeometry(1000, self.stream_height + 210, 100, 30)
+        self.text_btn_url_3.clicked.connect(self.backend_connection)
+
     # add menu bar to MainWindow
     def menu_bar(self):
         # create menu bar
         menuBar = self.menuBar()
-
         # create the action
         quitAction = QtWidgets.QAction("Quit", self)
         quitAction.setShortcut("CTRL+Q")
-
         # add action to menu
         controlMenu = menuBar.addMenu("&Control")
         controlMenu.addAction(quitAction)
-
         quitAction.triggered.connect(self.quit)
 
     def display_stream(self):
@@ -174,27 +182,49 @@ class MainWindow(QtWidgets.QMainWindow):
         # print(event.text())
         if(event.key() == QtCore.Qt.Key_Up):
             self.statusBar().showMessage("Up", 500)
-            # self.send_command("0")
+            self.send_command("0")
         elif(event.key() == QtCore.Qt.Key_Down):
             self.statusBar().showMessage("Down", 500)
-            # self.send_command("1")
+            self.send_command("1")
         elif(event.key() == QtCore.Qt.Key_Left):
             self.statusBar().showMessage("Left", 500)
-            # self.send_command("2")
+            self.send_command("2")
         elif(event.key() == QtCore.Qt.Key_Right):
             self.statusBar().showMessage("Right", 500)
-            # self.send_command("3")
+            self.send_command("3")
         elif(event.key() == QtCore.Qt.Key_F11):
             self.full_screen()
 
     def send_command(self, signal):
-        print(signal)
+        payload = {"direction": str(signal)}
+        # Request_URL = "http://127.0.0.1:5000/"
+        Request_URL = self.url_control
+        if(not Request_URL or Request_URL != ""):
+            try:
+                response = requests.post(Request_URL, data=payload)
+                if(response.status_code == requests.codes.ok):
+                    print(response, str(response.text))
+            except Exception:
+                self.statusBar().showMessage("URL NOT FOUND", 5000)
 
     def URL_read(self):
-        str1 = self.textEdit_url_1.toPlainText()
-        str2 = self.textEdit_url_2.toPlainText()
-        self.url_stream = str1
-        self.url_terrain = str2
+        URL_1 = self.textEdit_url_1.toPlainText()
+        URL_2 = self.textEdit_url_2.toPlainText()
+        self.url_stream = URL_1
+        self.url_terrain = URL_2
+
+    def backend_connection(self):
+        if(self.isControlling is False):
+            self.isControlling = True
+            self.textEdit_url_3.setReadOnly(True)
+            self.text_btn_url_3.setText("Clear")
+            URL = self.textEdit_url_3.toPlainText()
+            self.url_control = URL
+        else:
+            self.isControlling = False
+            self.textEdit_url_3.setReadOnly(False)
+            self.text_btn_url_3.setText("Connect")
+            self.url_control = ""
 
     def full_screen(self):
         if(self.windowState() & QtCore.Qt.WindowFullScreen):
