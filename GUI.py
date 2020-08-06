@@ -3,7 +3,7 @@ import os
 import style
 import stream
 import requests
-from PyQt5 import (QtWidgets, QtGui, QtCore, Qt)
+from PyQt5 import (QtWidgets, QtCore)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -180,32 +180,30 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def keyPressEvent(self, event):
         # print(event.text())
-        if(event.key() == QtCore.Qt.Key_Up):
-            self.statusBar().showMessage("Up", 500)
-            self.send_command("0")
-        elif(event.key() == QtCore.Qt.Key_Down):
-            self.statusBar().showMessage("Down", 500)
-            self.send_command("1")
-        elif(event.key() == QtCore.Qt.Key_Left):
-            self.statusBar().showMessage("Left", 500)
-            self.send_command("2")
-        elif(event.key() == QtCore.Qt.Key_Right):
-            self.statusBar().showMessage("Right", 500)
-            self.send_command("3")
-        elif(event.key() == QtCore.Qt.Key_F11):
+        if(event.key() == QtCore.Qt.Key_F11):
             self.full_screen()
+
+        if(self.isControlling is True):
+            if(event.key() == QtCore.Qt.Key_Up):
+                self.statusBar().showMessage("Up", 500)
+                self.send_command("0")
+            elif(event.key() == QtCore.Qt.Key_Down):
+                self.statusBar().showMessage("Down", 500)
+                self.send_command("1")
+            elif(event.key() == QtCore.Qt.Key_Left):
+                self.statusBar().showMessage("Left", 500)
+                self.send_command("2")
+            elif(event.key() == QtCore.Qt.Key_Right):
+                self.statusBar().showMessage("Right", 500)
+                self.send_command("3")
+        else:
+            self.statusBar().showMessage("Controller is Not Connected", 5000)
 
     def send_command(self, signal):
         payload = {"direction": str(signal)}
-        # Request_URL = "http://127.0.0.1:5000/"
-        Request_URL = self.url_control
-        if(not Request_URL or Request_URL != ""):
-            try:
-                response = requests.post(Request_URL, data=payload)
-                if(response.status_code == requests.codes.ok):
-                    print(response, str(response.text))
-            except Exception:
-                self.statusBar().showMessage("URL NOT FOUND", 5000)
+        # self.url_control = "http://127.0.0.1:5000/"
+        response = requests.post(self.url_control, data=payload)
+        print(response, str(response.text))
 
     def URL_read(self):
         URL_1 = self.textEdit_url_1.toPlainText()
@@ -215,11 +213,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def backend_connection(self):
         if(self.isControlling is False):
-            self.isControlling = True
-            self.textEdit_url_3.setReadOnly(True)
-            self.text_btn_url_3.setText("Clear")
-            URL = self.textEdit_url_3.toPlainText()
-            self.url_control = URL
+            self.url_control = self.textEdit_url_3.toPlainText()
+            payload = {"direction": ""}
+            if(not self.url_control or self.url_control != ""):
+                try:
+                    response = requests.post(self.url_control, data=payload)
+                    # print(response.status_code)
+                    if(response.status_code == requests.codes.ok):
+                        self.isControlling = True
+                        self.textEdit_url_3.setReadOnly(True)
+                        self.text_btn_url_3.setText("Clear")
+                        # print(response, str(response.text))
+                except Exception:
+                    self.statusBar().showMessage("URL NOT FOUND", 5000)
         else:
             self.isControlling = False
             self.textEdit_url_3.setReadOnly(False)
