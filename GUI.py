@@ -196,6 +196,12 @@ class MainWindow(QtWidgets.QMainWindow):
             elif(event.key() == QtCore.Qt.Key_Right):
                 self.statusBar().showMessage("Right", 500)
                 self.send_command("3")
+            elif(event.key() == QtCore.Qt.Key_W):
+                self.statusBar().showMessage("Stretch", 500)  # 伸展
+                self.send_command("4")
+            elif(event.key() == QtCore.Qt.Key_S):
+                self.statusBar().showMessage("Shrink", 500)  # 收縮stretch
+                self.send_command("5")
         else:
             self.statusBar().showMessage("Controller is Not Connected", 5000)
 
@@ -203,7 +209,7 @@ class MainWindow(QtWidgets.QMainWindow):
         payload = {"direction": str(signal)}
         # self.url_control = "http://127.0.0.1:5000/"
         response = requests.post(self.url_control, data=payload)
-        print(response, str(response.text))
+        # print(response, str(response.text))  # for debugging
 
     def URL_read(self):
         URL_1 = self.textEdit_url_1.toPlainText()
