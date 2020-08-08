@@ -3,6 +3,8 @@ import os
 import style
 import stream
 import requests
+# import datetime
+import time
 from PyQt5 import (QtWidgets, QtCore)
 
 
@@ -186,29 +188,35 @@ class MainWindow(QtWidgets.QMainWindow):
         if(self.isControlling is True):
             if(event.key() == QtCore.Qt.Key_Up):
                 self.statusBar().showMessage("Up", 500)
-                self.send_command("0")
+                self.send_command("up")
             elif(event.key() == QtCore.Qt.Key_Down):
                 self.statusBar().showMessage("Down", 500)
-                self.send_command("1")
+                self.send_command("down")
             elif(event.key() == QtCore.Qt.Key_Left):
                 self.statusBar().showMessage("Left", 500)
-                self.send_command("2")
+                self.send_command("left")
             elif(event.key() == QtCore.Qt.Key_Right):
                 self.statusBar().showMessage("Right", 500)
-                self.send_command("3")
+                self.send_command("right")
             elif(event.key() == QtCore.Qt.Key_W):
                 self.statusBar().showMessage("Stretch", 500)  # 伸展
-                self.send_command("4")
+                self.send_command("stretch")
             elif(event.key() == QtCore.Qt.Key_S):
                 self.statusBar().showMessage("Shrink", 500)  # 收縮stretch
-                self.send_command("5")
+                self.send_command("shrink")
+            elif(event.key() == QtCore.Qt.Key_Space):
+                self.statusBar().showMessage("Stop", 500)
+                self.send_command("stop")
         else:
             self.statusBar().showMessage("Controller is Not Connected", 5000)
 
     def send_command(self, signal):
         payload = {"direction": str(signal)}
         # self.url_control = "http://127.0.0.1:5000/"
+        # t1 = time.time()
         response = requests.post(self.url_control, data=payload)
+        # t2 = time.time()
+        # print(t2 - t1)
         # print(response, str(response.text))  # for debugging
 
     def URL_read(self):
