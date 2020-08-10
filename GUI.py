@@ -3,6 +3,7 @@ import os
 import style
 import stream
 import requests
+import json
 # import datetime
 import time
 from PyQt5 import (QtWidgets, QtCore)
@@ -214,7 +215,7 @@ class MainWindow(QtWidgets.QMainWindow):
         payload = {"direction": str(signal)}
         # self.url_control = "http://127.0.0.1:5000/"
         # t1 = time.time()
-        response = requests.post(self.url_control, data=payload)
+        response = requests.post(self.url_control, data=json.dumps(payload))
         # t2 = time.time()
         # print(t2 - t1)
         # print(response, str(response.text))  # for debugging
@@ -231,7 +232,7 @@ class MainWindow(QtWidgets.QMainWindow):
             payload = {"direction": ""}
             if(not self.url_control or self.url_control != ""):
                 try:
-                    response = requests.post(self.url_control, data=payload)
+                    response = requests.post(self.url_control, data=json.dumps(payload))
                     # print(response.status_code)
                     if(response.status_code == requests.codes.ok):
                         self.isControlling = True
