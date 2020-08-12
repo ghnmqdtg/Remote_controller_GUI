@@ -5,7 +5,7 @@ import stream
 import requests
 import json
 # import datetime
-import time
+import time, socket
 from PyQt5 import (QtWidgets, QtCore)
 
 
@@ -228,7 +228,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def backend_connection(self):
         if(self.isControlling is False):
-            self.url_control = self.textEdit_url_3.toPlainText()
+            host_url = self.textEdit_url_3.toPlainText()
+
+            # resolve the hostname to IP to keep from the latency of name resolving
+            self.url_control = url_resovling(host_url)
+            print("URL hostname resolved from {} to {}".format(host_url, self.url_control))
+
             payload = {"direction": ""}
             if(not self.url_control or self.url_control != ""):
                 try:
@@ -255,6 +260,21 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def quit(self):
         QtWidgets.qApp.quit()
+
+
+# url="https://google.com.tw:443", the port musst be specified
+# return: "https://XXX.XXX.XXX.XXX:443", where XXX.XXX.XXX.XXX is IPv4 address
+def url_resovling(url):
+    try: socket
+    except NameError: import socket
+    if type(url) is not str:
+        raise ValueError("The parameter url of url_resolving() should be str, not {}".format(type(url)))
+    s = url.split('//')
+    if len(s) != 2 :
+        raise ValueError("The parameter url should has the format: shemes://hostname:port")
+    hostname_and_port = s[1].split(':')
+    host_ip = socket.gethostbyname(hostname_and_port[0])
+    return s[0] + '//' + host_ip + ':' + hostname_and_port[1]
 
 
 if __name__ == "__main__":
