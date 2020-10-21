@@ -27,6 +27,10 @@ As you install all packages, just run `GUI.py`. You can press `F11` to enter ful
 ![](https://i.imgur.com/uBPDhXP.png)
 
 
+For `hexapod`, you should have the input text:
+- RTMP Server URL: rtmp://pi-hexapod/live
+- Backend Server: http://pi-hexapod:5000
+
 You have to connect to the robot, or the following keypress won't have any response.
 | Keyboard Instructions | Function      |
 | --------------------- | ------------- |
