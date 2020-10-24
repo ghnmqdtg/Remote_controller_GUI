@@ -1,0 +1,12 @@
+[Unit]
+Description=Flask as http server to receive requests to control servos.
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /root/hexapod/flask_http_server_service.py
+Restart=always
+# Restart after RestartSec if fails
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

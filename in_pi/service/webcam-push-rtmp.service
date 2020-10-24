@@ -1,0 +1,12 @@
+[Unit]
+Description=Push webcam(/dec/video0) to the local rtmp server
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/gst-launch-1.0 -v v4l2src ! 'video/x-raw, width=640, height=480, framerate=30/1' ! queue ! videoconvert ! omxh264enc !  h264parse ! flvmux ! rtmpsink location='rtmp://localhost:1935/live live=1'
+Restart=always
+# restart after RestartSec when failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

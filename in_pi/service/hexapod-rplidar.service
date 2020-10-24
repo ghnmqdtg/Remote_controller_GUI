@@ -1,0 +1,10 @@
+[Unit]
+Description=Rplidar of hexapod
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /root/hexapod/rplidar_tcp_socket_client.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
