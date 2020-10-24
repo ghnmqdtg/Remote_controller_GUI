@@ -234,8 +234,8 @@ class MainWindow(QtWidgets.QMainWindow):
             host_url = self.textEdit_url_3.toPlainText()
 
             # resolve the hostname to IP to keep from the latency of name resolving
-            self.url_control = url_resovling(host_url)
             self.statusBar().showMessage("Resolving host name...", 5000)
+            self.url_control = url_resovling(host_url)
             if(self.url_control is not None):
                 print("URL hostname resolved from {} to {}".format(host_url, self.url_control))
             else: # failed to resolve hostname
