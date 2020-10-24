@@ -8,6 +8,10 @@ import json
 import time, socket
 from PyQt5 import (QtWidgets, QtCore)
 
+# value of key in payload to send to the backend of pi-hexapod
+# 0:stupid walk, 1:normal walk, 2:best walk
+ACTION_MODE = 0
+
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -214,7 +218,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar().showMessage("Controller is Not Connected", 5000)
 
     def send_command(self, signal):
-        payload = {"direction": str(signal)}
+        payload = {"direction": str(signal), "mode": ACTION_MODE}
         # self.url_control = "http://127.0.0.1:5000/"
         # t1 = time.time()
         # response = requests.post(self.url_control, data=json.dumps(payload))
@@ -242,7 +246,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 print("Failed to resolve hostname to IP address")
                 self.statusBar().showMessage("Failed to resolve hostname, try to use IP instead.", 5000)
                 return
-            payload = {"direction": ""}
+            payload = {"direction": "", "mode": ACTION_MODE}
             if(not self.url_control or self.url_control != ""):
                 try:
                     response = requests.post(self.url_control, data=json.dumps(payload))
