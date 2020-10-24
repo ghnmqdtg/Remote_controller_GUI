@@ -235,8 +235,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # resolve the hostname to IP to keep from the latency of name resolving
             self.url_control = url_resovling(host_url)
-            print("URL hostname resolved from {} to {}".format(host_url, self.url_control))
-
+            self.statusBar().showMessage("Resolving host name...", 5000)
+            if(self.url_control is not None):
+                print("URL hostname resolved from {} to {}".format(host_url, self.url_control))
+            else: # failed to resolve hostname
+                print("Failed to resolve hostname to IP address")
+                self.statusBar().showMessage("Failed to resolve hostname, try to use IP instead.", 5000)
+                return
             payload = {"direction": ""}
             if(not self.url_control or self.url_control != ""):
                 try:
@@ -276,8 +281,11 @@ def url_resovling(url):
     if len(s) != 2 :
         raise ValueError("The parameter url should has the format: shemes://hostname:port")
     hostname_and_port = s[1].split(':')
-    host_ip = socket.gethostbyname(hostname_and_port[0])
-    return s[0] + '//' + host_ip + ':' + hostname_and_port[1]
+    try:
+        host_ip = socket.gethostbyname(hostname_and_port[0])
+        return s[0] + '//' + host_ip + ':' + hostname_and_port[1]
+    except socket.gaierror:
+        return None
 
 
 if __name__ == "__main__":
