@@ -49,6 +49,7 @@ def shrink():
   for ch in SERVO_CHs_LEG:
     pwm.set_pwm(ch, 0, SERVO_LEG_MAX)  # shrink
   time.sleep(DELAY)
+  rest()
 
 def stand():
   for ch in SERVO_CHs_LEG:  # set leg to middle
