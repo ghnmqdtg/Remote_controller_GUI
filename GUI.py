@@ -111,6 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.url_lb_3 = QtWidgets.QLabel("Backend Server", self)
         self.url_lb_3.setGeometry(30, self.stream_height + 210, 200, 30)
         self.textEdit_url_3 = QtWidgets.QTextEdit(self)
+        self.textEdit_url_3.setText("http://pi-hexapod:5000")
         self.textEdit_url_3.setGeometry(200, self.stream_height + 210, 780, 30)
         self.text_btn_url_3 = QtWidgets.QPushButton("Submit", self)
         self.text_btn_url_3.setGeometry(1000, self.stream_height + 210, 100, 30)
