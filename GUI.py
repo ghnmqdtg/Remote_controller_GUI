@@ -95,6 +95,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.url_lb_1.setGeometry(30, self.stream_height + 90, 150, 30)
         self.textEdit_url_1 = QtWidgets.QTextEdit(self)
         self.textEdit_url_1.setGeometry(200, self.stream_height + 90, 780, 30)
+        self.textEdit_url_1.setText("rtmp://pi-hexapod/live")
         self.text_btn_url_1 = QtWidgets.QPushButton("Submit", self)
         self.text_btn_url_1.setGeometry(1000, self.stream_height + 90, 100, 30)
         self.text_btn_url_1.clicked.connect(self.URL_read)
@@ -215,7 +216,8 @@ class MainWindow(QtWidgets.QMainWindow):
         payload = {"direction": str(signal)}
         # self.url_control = "http://127.0.0.1:5000/"
         # t1 = time.time()
-        response = requests.post(self.url_control, data=json.dumps(payload))
+        # response = requests.post(self.url_control, data=json.dumps(payload))
+        requests.post(self.url_control, data=json.dumps(payload))
         # t2 = time.time()
         # print(t2 - t1)
         # print(response, str(response.text))  # for debugging
@@ -239,7 +241,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 try:
                     response = requests.post(self.url_control, data=json.dumps(payload))
                     # print(response.status_code)
-                    if(response.status_code == requests.codes.ok):
+                    if(response.status_code == 200):
                         self.isControlling = True
                         self.textEdit_url_3.setReadOnly(True)
                         self.text_btn_url_3.setText("Clear")
