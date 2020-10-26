@@ -278,7 +278,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 # url="https://google.com.tw:443", the port musst be specified
 # return: "https://XXX.XXX.XXX.XXX:443", where XXX.XXX.XXX.XXX is IPv4 address
-def url_resovling(url):
+def url_resolving(url):
     try: socket
     except NameError: import socket
     if type(url) is not str:
