@@ -11,6 +11,8 @@ from PyQt5 import (QtWidgets, QtCore)
 # value of key in payload to send to the backend of pi-hexapod
 # 0:stupid walk, 1:normal walk, 2:best walk
 ACTION_MODE = 0
+DEFAULT_RTMP_URL    = 'rtmp://192.168.137.173/live'
+DEFAULT_BACKEND_URL = 'http://192.168.137.173:5000'
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -99,7 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.url_lb_1.setGeometry(30, self.stream_height + 90, 150, 30)
         self.textEdit_url_1 = QtWidgets.QTextEdit(self)
         self.textEdit_url_1.setGeometry(200, self.stream_height + 90, 780, 30)
-        self.textEdit_url_1.setText("rtmp://pi-hexapod/live")
+        self.textEdit_url_1.setText(DEFAULT_RTMP_URL)
         self.text_btn_url_1 = QtWidgets.QPushButton("Submit", self)
         self.text_btn_url_1.setGeometry(1000, self.stream_height + 90, 100, 30)
         self.text_btn_url_1.clicked.connect(self.URL_read)
@@ -115,7 +117,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.url_lb_3 = QtWidgets.QLabel("Backend Server", self)
         self.url_lb_3.setGeometry(30, self.stream_height + 210, 200, 30)
         self.textEdit_url_3 = QtWidgets.QTextEdit(self)
-        self.textEdit_url_3.setText("http://pi-hexapod:5000")
+        self.textEdit_url_3.setText(DEFAULT_BACKEND_URL)
         self.textEdit_url_3.setGeometry(200, self.stream_height + 210, 780, 30)
         self.text_btn_url_3 = QtWidgets.QPushButton("Submit", self)
         self.text_btn_url_3.setGeometry(1000, self.stream_height + 210, 100, 30)
